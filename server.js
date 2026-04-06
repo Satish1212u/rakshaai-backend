@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fetch = require('node-fetch'); // ✅ add this
 
 const app = express();
 app.use(cors());
@@ -100,9 +101,9 @@ Input: ${text}
   }
 });
 
-<<<<<<< HEAD
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("Server running on " + PORT);
 });
+const fetch = require('node-fetch');
