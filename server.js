@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');
 
 console.log("ENV KEY:", process.env.GEMINI_API_KEY); // 👈 ADD THIS
 
