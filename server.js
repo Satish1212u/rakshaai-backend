@@ -7,6 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("RakshaAI Backend Running ✅");
+});
+
 app.post('/analyze', async (req, res) => {
   try {
     const { text } = req.body;
