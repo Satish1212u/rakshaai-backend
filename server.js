@@ -1,13 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
-console.log("ENV KEY:", process.env.GEMINI_API_KEY); // 👈 ADD THIS
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 app.get("/", (req, res) => {
   res.send("RakshaAI Backend Running ✅");
 });
@@ -38,7 +36,7 @@ Input: ${text}
 `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -55,12 +53,14 @@ Input: ${text}
 
     // check response
     if (!response.ok) {
-      const errText = await response.text();
-      return res.status(500).json({
-        error: "API request failed",
-        details: errText
-      });
-    }
+  const errText = await response.text();
+  console.error("Gemini API Error:", errText);
+
+  return res.status(500).json({
+    error: "API request failed",
+    details: errText
+  });
+}
 
     const data = await response.json();
 
