@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
   res.send("RakshaAI Backend Running ✅");
 });
 
-// ✅ SINGLE analyze route
+// ✅ ANALYZE ROUTE
 app.post('/analyze', async (req, res) => {
   try {
     const { text } = req.body;
@@ -57,7 +57,12 @@ Return ONLY JSON:
 Input: ${text}
 `;
 
-    const URL = `https://generativelanguage.googleapis.com/v1/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    // 🔥 3 MODELS
+    const models = [
+      "gemini-flash-latest",
+      "gemini-2.5-flash",
+      "gemini-2.5-pro"
+    ];
 
     const options = {
       method: "POST",
@@ -69,8 +74,37 @@ Input: ${text}
       })
     };
 
-    // ✅ USE retry logic
-    const response = await callGemini(URL, options);
+    let response;
+    let success = false;
+
+    // 🔥 Try multiple models
+    for (let model of models) {
+      try {
+        const URL = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+        response = await callGemini(URL, options);
+        success = true;
+
+        console.log("✅ Success with model:", model);
+        break;
+
+      } catch (err) {
+        console.log("❌ Failed model:", model);
+      }
+    }
+
+    // ❌ All models failed
+    if (!success) {
+      return res.status(200).json({
+        riskLevel: "Unknown",
+        score: 0,
+        whatIsHappening: "All AI servers are busy. Please try again.",
+        whyDangerous: "Temporary overload",
+        immediateSteps: ["Wait a few seconds", "Try again"],
+        preventionTips: [],
+        reportingOptions: []
+      });
+    }
 
     const data = await response.json();
 
@@ -110,13 +144,12 @@ Input: ${text}
   } catch (err) {
     console.log("FINAL ERROR:", err);
 
-    // ✅ fallback response (no crash)
     res.status(200).json({
       riskLevel: "Unknown",
       score: 0,
-      whatIsHappening: "AI server busy, try again",
+      whatIsHappening: "Our AI system is currently under heavy load. Please try again.",
       whyDangerous: "Temporary issue",
-      immediateSteps: [],
+      immediateSteps: ["Wait a few seconds", "Try again"],
       preventionTips: [],
       reportingOptions: []
     });
