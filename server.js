@@ -1,7 +1,30 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');
+const response = await fetch(URL, options);
+
+async function callGemini(url, options, retries = 3) {
+  try {
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+
+    return res;
+
+  } catch (err) {
+    console.log("Retrying Gemini...", retries);
+
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, 2000)); // wait 2 sec
+      return callGemini(url, options, retries - 1);
+    }
+
+    throw err;
+  }
+}
 
 const app = express();
 app.use(cors());
@@ -36,7 +59,7 @@ Input: ${text}
 `;
 
     const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+  `https://generativelanguage.googleapis.com/v1/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -56,10 +79,15 @@ Input: ${text}
   const errText = await response.text();
   console.error("Gemini API Error:", errText);
 
-  return res.status(500).json({
-    error: "API request failed",
-    details: errText
-  });
+  returnres.status(200).json({
+  riskLevel: "Unknown",
+  score: 0,
+  whatIsHappening: "AI server busy, try again",
+  whyDangerous: "Temporary issue",
+  immediateSteps: [],
+  preventionTips: [],
+  reportingOptions: []
+});
 }
 
     const data = await response.json();
